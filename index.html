@@ -56,7 +56,7 @@ h2{font-size:16px;font-weight:500}
 .chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:13px}
 .chips button{padding:9px 2px;font-size:13px;border-radius:12px;min-width:0;overflow-wrap:anywhere}
 .cat{margin-top:14px;font-size:14px}
-.swatches{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin-top:8px}
+.swatches{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px 4px}
 .swatches button{border:0;border-radius:10px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:2px 0}
 .swatches i{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-style:normal}
 .swatches small{font-size:11px}
@@ -69,6 +69,8 @@ h2{font-size:16px;font-weight:500}
 .pill{border:1.5px solid var(--line);border-radius:99px;background:var(--paper);padding:3px 14px;font-size:13px;cursor:pointer}
 .pill:focus-within{outline:3px solid var(--water)}
 .sr{position:absolute;width:1px;height:1px;opacity:0}
+.on,.cta,.three button,.meal .on{color:#242422}
+.cta[style*="background:none"],label.cta{color:var(--ink)}
 li.ing{gap:12px}.hint{display:block;color:var(--soft);padding-left:18px}.mark{text-align:right;font-size:13px}
 .thumb{width:66px;height:66px;object-fit:cover;border-radius:11px;border:1.5px solid var(--line);flex:none}
 .card .top .info{flex:1;min-width:0}
@@ -104,7 +106,7 @@ ol{padding-left:20px;font-size:14px}
 .field input{border:0;background:none;text-align:right;min-width:0;flex:1}
 .sheet{position:fixed;inset:0;background:#0006;display:flex;align-items:flex-end;justify-content:center;z-index:5}
 .sheet>div{background:var(--paper);width:100%;max-width:430px;max-height:80%;overflow:auto;border-radius:22px 22px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px))}
-#toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 18px;border-radius:14px;font-size:13px;width:max-content;max-width:90%;text-align:center;z-index:9}
+#toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 18px;border-radius:14px;font-size:13px;width:max-content;max-width:90%;text-align:center;z-index:9}
 .motto{text-align:center;font-size:12px;border-top:2px solid var(--lime);padding-top:8px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -167,7 +169,7 @@ const note4=m=>[...m.swap.map(([a,b])=>`${a} → ${b}`),m.skip.length?`without $
 const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],FULL=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 const MEALS=[['Breakfast','Choose a recipe'],['Lunch','Choose a recipe'],['Dinner','Plan something delicious']];
 const today=()=>new Date().toLocaleDateString('en-CA');
-const FRESH={signed:false,color:'lime',dob:{d:'',m:'',y:''},verified:'',avatar:'',sex:'female',height:'',weight:'',activity:'walk',minutes:'',log:[],custom:[],have:['Eggs','Tomatoes','Bread','Pasta','Chicken','Rice','Cheese','Spinach'],water:750,date:today(),plan:{'0-0':'toast'},cooked:{},remind:false,name:'',age:'',mail:'',out:false};
+const FRESH={bg:'white',shot:0,shots:[],signed:false,color:'lime',dob:{d:'',m:'',y:''},verified:'',avatar:'',sex:'female',height:'',weight:'',activity:'walk',minutes:'',log:[],custom:[],have:['Eggs','Tomatoes','Bread','Pasta','Chicken','Rice','Cheese','Spinach'],water:750,date:today(),plan:{'0-0':'toast'},cooked:{},remind:false,name:'',age:'',mail:'',out:false};
 let S=structuredClone(FRESH);
 try{Object.assign(S,JSON.parse(localStorage.getItem('vitala')||'{}'))}catch(e){}
 const save=()=>{try{localStorage.setItem('vitala',JSON.stringify(S))}catch(e){}};
@@ -190,9 +192,16 @@ function art(k,cls){const [a,b,c]=TINT[k]||['#e9b45c','#6fa84f','#d9604f'];const
  return `<svg class="${cls}" viewBox="0 0 360 150" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Drawing of ${R[k].n}"><rect width="360" height="150" style="fill:var(--wash)"/><circle cx="180" cy="75" r="68" fill="#fdfdfb" stroke="#4a4a47" stroke-width="2"/>${bits.map(([x,y,r,f])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${f}" stroke="#4a4a47" stroke-width="1.5"/>`).join('')}</svg>`}
 const food=(k,cls)=>noImg.has(k)?art(k,cls):`<img class="${cls}" data-food="${k}" src="recipe-${k}.jpg" alt="${R[k].n}">`;
 document.addEventListener('error',e=>{const k=e.target.dataset?.food;if(k){noImg.add(k);e.target.outerHTML=art(k,e.target.className)}},true);
-let noPhoto=false;
-const hero=()=>noPhoto?HERO:'<img class="hero" src="hero.jpg" alt="Fresh food">';
-document.addEventListener('error',e=>{if(e.target.matches?.('img.hero')){noPhoto=true;e.target.outerHTML=HERO}},true);
+// home photo: a different one on every visit, from the photos that exist next to the app
+const SHOTS=['hero','hero2','hero3','hero4','hero5','hero6',...['toast','omelette','pasta','bowl','salad','pancakes','shakshuka','scrambled','friedrice','grilledcheese','chickenpasta','frittata','chickensoup'].map(k=>'recipe-'+k)].map(n=>n+'.jpg');
+const shotNow=()=>S.shots.length?S.shots[S.shot%S.shots.length]:'hero.jpg';
+const hero=()=>`<img class="hero" src="${shotNow()}" alt="Fresh food">`;
+const swapHero=()=>{const el=$('.hero');if(el&&el.getAttribute('src')!==shotNow())el.outerHTML=hero()};
+async function findShots(){
+ const found=await Promise.all(SHOTS.map(f=>fetch(f,{method:'HEAD',cache:'no-store'}).then(r=>r.ok?f:null)));
+ S.shots=found.filter(Boolean);save();swapHero()}
+function nextShot(){S.shot++;save();swapHero();findShots().catch(()=>{})}
+document.addEventListener('error',e=>{if(e.target.matches?.('img.hero'))e.target.outerHTML=HERO},true);
 const avatar=cls=>`<img class="${cls}" src="${esc(S.avatar)}" alt="">`;
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const daysIn=(m,y)=>m?new Date(Number(y)||2000,Number(m),0).getDate():31;
@@ -209,10 +218,16 @@ const mailHTML=()=>S.mail&&S.verified===S.mail?'<small>✓ Email confirmed (demo
 let code='',afterCode=null;
 function askCode(mail,done){code=String(1000+Math.floor(Math.random()*9000));afterCode=done;
  sheet(`<h2>Confirm your email</h2><p>This is a demo, so no email is sent to ${esc(mail)}.</p><p>Your demo code is <b>${code}</b></p><input class="code" id="code" inputmode="numeric" autocomplete="off" maxlength="4" aria-label="Code" placeholder="0000"><button class="cta" data-act="checkcode">Confirm</button><button class="link" data-act="close">Cancel</button>`)}
-// [name, accent, light tint]
-const COLORS={lime:['Lime','#d6ee5c','#eef7bd'],pink:['Pink','#ffb3cd','#ffe3ec'],blue:['Blue','#a9d4ff','#ddeeff'],lilac:['Lilac','#d3bdfa','#ede4fd'],peach:['Peach','#ffc59a','#ffe8d6'],mint:['Mint','#a8e8c8','#daf5e8']};
-function paint(){const [,main,soft]=COLORS[S.color]||COLORS.lime,st=document.documentElement.style;st.setProperty('--lime',main);st.setProperty('--wash',soft)}
-const colorCard=()=>`<div class="box"><h2>App color</h2><div class="swatches">${Object.entries(COLORS).map(([k,[n,main]])=>`<button data-color="${k}" aria-pressed="${S.color===k}" aria-label="${n}"><i style="background:${main}">${S.color===k?'✓':''}</i><small>${n}</small></button>`).join('')}</div></div>`;
+// accents: [name, accent, light tint]; backgrounds: [name, color, is dark]
+const COLORS={lime:['Lime','#d6ee5c','#eef7bd'],yellow:['Yellow','#ffe066','#fff2b8'],peach:['Peach','#ffc59a','#ffe8d6'],coral:['Coral','#ff9f94','#ffded9'],pink:['Pink','#ffb3cd','#ffe3ec'],lilac:['Lilac','#d3bdfa','#ede4fd'],blue:['Blue','#a9d4ff','#ddeeff'],aqua:['Aqua','#8fe3e0','#d3f6f4'],mint:['Mint','#a8e8c8','#daf5e8'],silver:['Silver','#cfcfca','#e9e9e5']};
+const BGS={white:['White','#fdfdfb'],cream:['Cream','#fbf1dc'],rose:['Rose','#fdebf0'],sky:['Sky','#e9f3fc'],grey:['Grey','#dcdcd8'],graphite:['Dark grey','#38393d',1],navy:['Navy','#18223b',1],black:['Black','#0e0e0f',1]};
+const mix=(a,b,t)=>'#'+[1,3,5].map(i=>Math.round(parseInt(a.slice(i,i+2),16)*t+parseInt(b.slice(i,i+2),16)*(1-t)).toString(16).padStart(2,'0')).join('');
+function paint(){const [,main,tint]=COLORS[S.color]||COLORS.lime,[,paper,dark]=BGS[S.bg]||BGS.white,st=document.documentElement.style;
+ const v={lime:main,wash:dark?mix(main,paper,.24):tint,paper,desk:mix(paper,'#000000',dark?.7:.93),ink:dark?'#f3f3ef':'#2d2d2b',soft:dark?'#bdbdb7':'#595953',line:dark?'#92928c':'#4a4a47',water:dark?'#3fc0ae':'#17897a'};
+ for(const [k,c] of Object.entries(v))st.setProperty('--'+k,c);
+ st.colorScheme=dark?'dark':'light';st.background=paper;document.querySelector('meta[name=theme-color]')?.setAttribute('content',paper)}
+const swatches=(list,attr,current)=>`<div class="swatches">${Object.entries(list).map(([k,[n,c]])=>`<button data-${attr}="${k}" aria-pressed="${current===k}" aria-label="${n}"><i style="background:${c};color:${list===BGS&&list[k][2]?'#fff':'#242422'}">${current===k?'✓':''}</i><small>${n}</small></button>`).join('')}</div>`;
+const colorCard=()=>`<div class="box stack"><h2>App color</h2>${swatches(COLORS,'color',S.color)}<h2>Background</h2>${swatches(BGS,'bg',S.bg)}</div>`;
 const TABS=[['home','Home'],['ingredients','Ingredients'],['recipes','Recipes'],['planner','Planner'],['water','Water']];
 const head=(tabs=true,cur=view)=>`<header><div class="logo">Vitala</div><button class="round" data-go="profile" aria-label="My profile">${S.avatar?avatar('ava'):ic('user')}</button></header>`+
  (tabs?`<nav>${TABS.map(([v,l])=>`<button data-go="${v}" class="${v===cur?'on':''}">${l}</button>`).join('')}</nav>`:'');
@@ -421,6 +436,7 @@ document.addEventListener('click',e=>{
  <div id="pick-list" class="stack">${pickList(d.choose,'')}</div>`)}
  else if(d.slot){const key=day+'-'+d.slot;if(d.pick)S.plan[key]=d.pick;else delete S.plan[key];save();sheet();render()}
  else if(d.color){S.color=d.color;save();render()}
+ else if(d.bg){S.bg=d.bg;save();render()}
  else if(d.del){S.log=S.log.filter(x=>x.id!==+d.del);save();render()}
  else if(d.found){found=found.includes(d.found)?found.filter(x=>x!==d.found):[...found,d.found];pickFound()}
 });
@@ -441,8 +457,8 @@ document.addEventListener('change',e=>{
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='code')return ACT.checkcode();if(e.key==='Enter'&&(e.target.id==='login'||e.target.id==='login-mail'))ACT.login()});
 addEventListener('hashchange',()=>{sheet();render(true)});
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e});
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S.date!==today())render()});
-render(true);schedule();
+document.addEventListener('visibilitychange',()=>{if(document.hidden)return;if(S.date!==today())render();nextShot()});
+S.shot++;save();render(true);schedule();findShots().catch(()=>{});
 </script>
 <script>if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js')</script>
 </body>
