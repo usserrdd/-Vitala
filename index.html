@@ -206,7 +206,9 @@ function birthHTML(){const year=new Date().getFullYear();
  <div class="field"><span>Age</span><span>${S.age?esc(S.age):'Choose your date of birth'}</span></div>`}
 const validMail=m=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(m);
 const mailHTML=()=>S.mail&&S.verified===S.mail?'<small>✓ Email confirmed (demo)</small>':'<button class="pill" data-act="verify">Confirm email</button>';
-let code='';
+let code='',afterCode=null;
+function askCode(mail,done){code=String(1000+Math.floor(Math.random()*9000));afterCode=done;
+ sheet(`<h2>Confirm your email</h2><p>This is a demo, so no email is sent to ${esc(mail)}.</p><p>Your demo code is <b>${code}</b></p><input class="code" id="code" inputmode="numeric" autocomplete="off" maxlength="4" aria-label="Code" placeholder="0000"><button class="cta" data-act="checkcode">Confirm</button><button class="link" data-act="close">Cancel</button>`)}
 // [name, accent, light tint]
 const COLORS={lime:['Lime','#d6ee5c','#eef7bd'],pink:['Pink','#ffb3cd','#ffe3ec'],blue:['Blue','#a9d4ff','#ddeeff'],lilac:['Lilac','#d3bdfa','#ede4fd'],peach:['Peach','#ffc59a','#ffe8d6'],mint:['Mint','#a8e8c8','#daf5e8']};
 function paint(){const [,main,soft]=COLORS[S.color]||COLORS.lime,st=document.documentElement.style;st.setProperty('--lime',main);st.setProperty('--wash',soft)}
@@ -376,9 +378,8 @@ const ACT={
  addfound(){scanId++;const n=found.length;S.have=[...new Set([...S.have,...found])];save();sheet();toast(n?'Ingredients added':'Nothing selected')},
  close(){scanId++;sheet()},
  verify(){if(!validMail(S.mail))return toast('Enter a correct email first, like name@gmail.com');
-  code=String(1000+Math.floor(Math.random()*9000));
-  sheet(`<h2>Confirm your email</h2><p>This is a demo, so no email is sent to ${esc(S.mail)}.</p><p>Your demo code is <b>${code}</b></p><input class="code" id="code" inputmode="numeric" maxlength="4" aria-label="Code" placeholder="0000"><button class="cta" data-act="checkcode">Confirm</button><button class="link" data-act="close">Cancel</button>`)},
- checkcode(){if($('#code').value.trim()!==code)return toast('Wrong code. Check it and try again.');S.verified=S.mail;save();sheet();render();toast('Email confirmed (demo)')},
+  const mail=S.mail;askCode(mail,()=>{S.verified=mail;save();render();toast('Email confirmed (demo)')})},
+ checkcode(){if($('#code').value.trim()!==code)return toast('Wrong code. Check it and try again.');const done=afterCode;afterCode=null;sheet();if(done)done()},
  noava(){S.avatar='';save();render()},
  addburn(){if(!(inRange(S.age,18,100)&&inRange(S.weight,35,250)&&inRange(S.height,120,230)))return toast('Fill in date of birth (18+), height and weight first');
   const min=Number(S.minutes);if(!inRange(min,1,600))return toast('Enter minutes from 1 to 600');
@@ -392,9 +393,12 @@ const ACT={
  login(){const name=$('#login').value.trim(),mail=$('#login-mail').value.trim();
   if(!name)return toast('Please enter your name');
   if(!validMail(mail))return toast('Enter a correct email, like name@gmail.com');
+  const finish=()=>{
   // another person on the same phone must not see the previous profile
   if(S.signed&&S.mail&&mail.toLowerCase()!==S.mail.toLowerCase())Object.assign(S,{avatar:'',verified:'',dob:{d:'',m:'',y:''},age:'',height:'',weight:'',log:[],plan:{},cooked:{},water:0});
-  S.name=name;S.mail=mail;S.signed=true;S.out=false;save();go('home')},
+  S.name=name;S.mail=mail;S.verified=mail;S.signed=true;S.out=false;save();go('home')};
+  // an email already confirmed on this phone signs in without a new code
+  if(S.signed&&mail===S.verified)finish();else askCode(mail,finish)},
  premium(){toast('Premium is a concept in this student project. Nothing is charged.')},
  async install(){
   if(installEvt){installEvt.prompt();installEvt=null;return}
@@ -434,7 +438,7 @@ document.addEventListener('change',e=>{
  if(e.target.id==='ava-file'&&e.target.files[0])setAvatar(e.target.files[0]);
  if(e.target.id==='file'&&e.target.files[0]){const r=new FileReader();r.onload=()=>{stopCam();photo=r.result;render();recognize()};r.readAsDataURL(e.target.files[0])}
 });
-document.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.target.id==='login'||e.target.id==='login-mail'))ACT.login()});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='code')return ACT.checkcode();if(e.key==='Enter'&&(e.target.id==='login'||e.target.id==='login-mail'))ACT.login()});
 addEventListener('hashchange',()=>{sheet();render(true)});
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S.date!==today())render()});
