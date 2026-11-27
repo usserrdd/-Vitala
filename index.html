@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vitala</title>
+<meta name="description" content="Vitala. Eat healthy. Save time.">
+<meta name="theme-color" content="#fdfdfb">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Vitala">
+<style>:root{color-scheme:light;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);background:#fdfdfb;height:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<style>
+/* layout: one phone column; sketch's pill tabs on top, highlighter lime marks the active/primary things */
+:root{--paper:#fdfdfb;--desk:#e9e8e3;--ink:#2d2d2b;--soft:#6d6d68;--line:#4a4a47;--lime:#d6ee5c;--wash:#eef7bd;--water:#17897a}
+@font-face{font-family:Poppins;font-weight:400;font-display:swap;src:url(poppins-400.ttf) format('truetype')}
+@font-face{font-family:Poppins;font-weight:500;font-display:swap;src:url(poppins-500.ttf) format('truetype')}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--desk);color:var(--ink);font:400 15px/1.45 Poppins,system-ui,sans-serif}
+#app{max-width:430px;margin:0 auto;height:100%;overflow-y:auto;background:var(--paper);padding-block:14px 32px;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}
+button,input{font:inherit;color:inherit}
+button{background:none;border:1.5px solid var(--line);border-radius:999px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:active{transform:scale(.97)}
+:focus-visible{outline:3px solid var(--water);outline-offset:2px}
+svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.logo{font-size:23px;font-weight:500}
+.round{width:40px;height:40px;display:grid;place-items:center;flex:none}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+nav button{padding:5px 15px;font-size:14px}
+.on{background:var(--lime)}
+h1{font-size:25px;font-weight:500;line-height:1.25}
+h2{font-size:16px;font-weight:500}
+.sub{color:var(--soft);font-size:13px;margin-bottom:14px}
+.stack{display:flex;flex-direction:column;gap:11px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.box{border:1.5px solid var(--line);border-radius:16px;padding:13px;min-width:0}
+.cta{width:100%;padding:11px;background:var(--lime);font-weight:500;display:flex;justify-content:center;align-items:center;gap:9px}
+.link{border:0;font-size:13px;color:var(--soft);text-decoration:underline;padding:4px}
+.plain{border:0;border-radius:6px;padding:4px 0;display:flex;align-items:center;gap:9px;text-align:left}
+.card{width:100%;border-radius:15px;text-align:left;overflow:hidden;display:block}
+.card .top{padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.card b{font-weight:500;display:block}
+.card small{color:var(--soft);display:block}
+.macro{background:var(--wash);border-top:1.5px solid var(--line);padding:5px 14px;font-size:12px;display:flex;gap:14px;flex-wrap:wrap}
+.hero{width:100%;height:auto;display:block;border:1.5px solid var(--line);border-radius:18px}
+.search{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:999px;padding:7px 14px}
+.search input{border:0;background:none;flex:1;min-width:0;outline:0}
+.search:focus-within{outline:3px solid var(--water)}
+.chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:13px}
+.chips button{padding:9px 2px;font-size:14px;border-radius:12px}
+.finder{aspect-ratio:3/4;max-height:56vh;width:100%;border:7px solid var(--lime);outline:1.5px solid var(--line);border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:14px;position:relative;overflow:hidden}
+.finder video,.finder img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.title-card{background:var(--wash);text-align:center}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.facts div{border:1.5px solid var(--line);border-radius:11px;background:var(--wash);text-align:center;padding:7px 2px;font-size:11px}
+.facts b{display:block;font-size:15px;font-weight:500;font-variant-numeric:tabular-nums}
+ul{list-style:none}
+li.ing{display:flex;justify-content:space-between;padding:3px 0}
+ol{padding-left:20px;font-size:14px}
+.meal{background:var(--wash)}
+.meal button{padding:4px 12px;background:var(--paper);font-size:13px;flex:none}
+.days{display:flex;flex-wrap:wrap;gap:7px}
+.days button{padding:3px 12px;font-size:13px}
+.center{text-align:center}
+.big{font-size:34px;font-weight:500;font-variant-numeric:tabular-nums}
+.bar{height:15px;border:1.5px solid var(--line);border-radius:99px;overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;background:var(--water);transition:width .35s}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}
+.three button{background:var(--lime);padding:8px 0;font-weight:500}
+.switch{width:96px;height:32px;position:relative;overflow:hidden;margin:10px auto 0;display:block}
+.switch i{position:absolute;top:0;bottom:0;left:0;width:52%;background:var(--line);opacity:.18;border-radius:99px;transition:.25s}
+.switch[aria-checked=true] i{left:48%;background:var(--lime);opacity:1}
+.field{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1.5px solid var(--line);padding:9px 0}
+.field input{border:0;background:none;text-align:right;min-width:0;flex:1}
+.sheet{position:fixed;inset:0;background:#0006;display:flex;align-items:flex-end;justify-content:center;z-index:5}
+.sheet>div{background:var(--paper);width:100%;max-width:430px;max-height:80%;overflow:auto;border-radius:22px 22px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px))}
+#toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 18px;border-radius:14px;font-size:13px;width:max-content;max-width:90%;text-align:center;z-index:9}
+.motto{text-align:center;font-size:12px;border-top:2px solid var(--lime);padding-top:8px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<main id="app"></main>
+<div id="sheet" class="sheet" hidden></div>
+<div id="toast" role="status" hidden></div>
+<script>
+const INGREDIENTS=['Eggs','Tomatoes','Bread','Pasta','Chicken','Rice','Milk','Cheese','Flour','Cucumber','Potatoes','Spinach'];
+const R={
+ toast:{n:'Tomato Egg Toast',t:10,k:285,p:15,c:29,f:11,d:'Crisp toast topped with egg and fresh tomatoes',i:['Eggs','Tomatoes','Bread'],
+  s:['Prepare and wash all ingredients.','Toast the bread. Heat a pan with a little cooking oil.','Fry the egg and slice the tomatoes.','Put them on the toast, serve and enjoy!']},
+ omelette:{n:'Spinach Omelette',t:15,k:340,p:22,c:6,f:22,d:'Soft omelette with spinach and melted cheese',i:['Eggs','Spinach','Cheese'],
+  s:['Wash the spinach and beat the eggs.','Heat a pan with a little oil and soften the spinach.','Pour in the eggs and add the cheese.','Fold when set, serve and enjoy!']},
+ pasta:{n:'Creamy Tomato Pasta',t:20,k:420,p:14,c:58,f:14,d:'Pasta in a creamy tomato sauce',i:['Pasta','Tomatoes','Milk','Cheese'],
+  s:['Boil the pasta in salted water.','Cook chopped tomatoes in a pan until soft.','Stir in milk and cheese.','Mix with the pasta, serve and enjoy!']},
+ bowl:{n:'Chicken Rice Bowl',t:25,k:480,p:35,c:55,f:12,d:'Warm rice with chicken and crunchy cucumber',i:['Chicken','Rice','Cucumber'],
+  s:['Cook the rice.','Cut the chicken and cook it fully in a pan.','Slice the cucumber.','Put everything in a bowl, serve and enjoy!']}
+};
+const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],FULL=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const MEALS=[['Breakfast','Choose a recipe'],['Lunch','Choose a recipe'],['Dinner','Plan something delicious']];
+const today=()=>new Date().toLocaleDateString('en-CA');
+const FRESH={have:['Eggs','Tomatoes','Bread','Pasta','Chicken','Rice','Cheese','Spinach'],water:750,date:today(),plan:{'0-0':'toast'},cooked:{},remind:false,name:'Asiya',age:'',mail:'',out:false};
+let S=structuredClone(FRESH);
+try{Object.assign(S,JSON.parse(localStorage.getItem('vitala')||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem('vitala',JSON.stringify(S))}catch(e){}};
+function newDay(){if(S.date!==today()){S.date=today();S.water=0;S.cooked={};save()}}
+let day=(new Date().getDay()+6)%7,query='',stream=null,photo='',found=[],installEvt=null,timer=null,view='home';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+const P={user:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="9.5" r="3"/><path d="M5.8 19c1.2-5 11.2-5 12.4 0"/>',
+ cam:'<path d="M3 8h4l2-3h6l2 3h4v11H3z"/><circle cx="12" cy="13" r="3.5"/>',
+ drop:'<path d="M12 3s-6 7-6 11.5a6 6 0 0 0 12 0C18 10 12 3 12 3z"/>',
+ find:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/>',
+ go:'<path d="m9 5 7 7-7 7"/>',carrot:'<path d="M4 20 11 8c3-1 6 2 5 5zM14 10l5-5M13 9l1-5M15 11l5-1"/>',
+ frame:'<path d="M3 8V4h4M17 4h4v4M21 16v4h-4M7 20H3v-4M8 12h8"/>'};
+const ic=n=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
+const HERO=`<svg class="hero" viewBox="0 0 360 150" role="img" aria-label="Plate with fried eggs and sausages"><rect width="360" height="150" fill="#b9806c"/><path d="M0 38 360 26M0 112 360 122" stroke="#a46c59" stroke-width="3" fill="none"/><ellipse cx="180" cy="75" rx="96" ry="68" fill="#fdfdfb" stroke="#4a4a47" stroke-width="2"/><ellipse cx="180" cy="75" rx="76" ry="52" fill="none" stroke="#bbb" stroke-width="1.5"/><path d="M122 52c4-24 40-22 48-10 24-6 34 28 10 32-8 16-44 12-44-2-12-2-18-12-14-20z" fill="#fff" stroke="#4a4a47" stroke-width="1.5"/><path d="M185 62c10-20 48-16 46 4 16 14-6 34-24 24-22 8-36-14-22-28z" fill="#fff" stroke="#4a4a47" stroke-width="1.5"/><circle cx="150" cy="55" r="13" fill="#f4d23c"/><circle cx="208" cy="73" r="13" fill="#f4d23c"/><g stroke-linecap="round" fill="none"><path d="M135 90l34 24M158 87l32 22" stroke="#4a4a47" stroke-width="15"/><path d="M135 90l34 24M158 87l32 22" stroke="#d9776d" stroke-width="12"/></g></svg>`;
+
+const TABS=[['home','Home'],['ingredients','Ingredients'],['recipes','Recipes'],['planner','Planner'],['water','Water']];
+const head=(tabs=true,cur=view)=>`<header><div class="logo">Vitala</div><button class="round" data-go="profile" aria-label="My profile">${ic('user')}</button></header>`+
+ (tabs?`<nav>${TABS.map(([v,l])=>`<button data-go="${v}" class="${v===cur?'on':''}">${l}</button>`).join('')}</nav>`:'');
+const have=r=>r.i.filter(x=>S.have.includes(x)).length;
+const ranked=()=>Object.keys(R).sort((a,b)=>have(R[b])/R[b].i.length-have(R[a])/R[a].i.length);
+
+const V={
+home:()=>head()+`<div class="stack"><div><h1>Hello, ${esc(S.name)}!</h1><div class="sub" style="margin:0">What are we cooking today?</div></div>${HERO}
+ <button class="cta" data-go="ingredients">+ Add your ingredients</button>
+ <div class="row"><h2>Recommended for you</h2><button class="link" data-go="recipes">See all</button></div>
+ ${['toast','omelette'].map(k=>`<button class="card" data-go="details-${k}"><div class="top"><div><b>${R[k].n}</b><small>${R[k].t} min · ${R[k].k} kcal</small></div>${ic('go')}</div></button>`).join('')}
+ <div class="box row" style="border-radius:18px"><button class="plain" data-go="water">${ic('drop')}<span><small>Water recorded</small><br><span style="font-size:22px">${S.water} ml</span></span></button><button class="round" data-add="250" aria-label="Add 250 ml of water" style="font-size:22px">+</button></div></div>`,
+
+ingredients:()=>head()+`<h1>My Ingredients</h1><div class="sub">Select the food you have in your kitchen</div><div class="stack">
+ <div class="box"><label class="search"><input id="q" placeholder="Find ingredients" aria-label="Find ingredients" value="${esc(query)}">${ic('find')}</label><div class="chips" id="chips">${chips()}</div></div>
+ <button class="cta" data-go="recipes">Find my recipes →</button>
+ <div class="box row" style="justify-content:flex-start">${ic('carrot')}<span>${S.have.length} ingredients added</span></div>
+ <button class="plain" data-go="scan">${ic('cam')}<span>Scan ingredients instead</span></button></div>`,
+
+scan:()=>head(false)+`<button class="link" data-go="ingredients">← Back to ingredients</button><h1>Scan Ingredients</h1><div class="sub">Recognize products in your fridge with your camera</div><div class="stack">
+ <div class="finder">${photo?`<img src="${photo}" alt="Your photo">`:stream?'<video id="video" autoplay playsinline muted></video>':`${ic('frame')}<h2>Camera scanner</h2><div class="sub" style="margin:0">Place your ingredients inside the frame</div>${ic('cam')}`}</div>
+ <button class="cta" data-act="${stream?'shoot':'scan'}">${ic('cam')}${stream?'Take photo':photo?'Scan again':'Start scanning'}</button>
+ <input type="file" id="file" accept="image/*" capture="environment" hidden></div>`,
+
+recipes:()=>head()+`<h1>Recipe Suggestions</h1><div class="row sub"><span>${S.have.length} ingredients selected</span><button data-go="ingredients" style="padding:2px 14px">Edit</button></div><div class="stack">
+ ${ranked().map(k=>{const r=R[k];return `<button class="card" data-go="details-${k}"><div class="top"><div><b>${r.n}</b><small>${r.t} min · Easy · you have ${have(r)} of ${r.i.length}</small></div>${ic('go')}</div><div class="macro"><span>${r.k} kcal</span><span>Protein ${r.p}g</span><span>Fat ${r.f}g</span></div></button>`}).join('')}</div>`,
+
+details:k=>{const r=R[k];return head(false)+`<button class="link" data-go="recipes">← Back to recipes</button><h1 style="margin-bottom:10px">Recipe details</h1><div class="box stack">
+ <div class="box title-card"><h2 style="font-size:19px">${r.n}</h2><small>${r.t} min · Easy</small></div><div class="sub" style="margin:0">${r.d}</div>
+ <h2>Nutrition per serving</h2><div class="facts"><div><b>${r.k}</b>kcal</div><div><b>${r.p}g</b>Protein</div><div><b>${r.c}g</b>Carbs</div><div><b>${r.f}g</b>Fat</div></div>
+ <h2>Ingredients</h2><ul>${r.i.map(x=>`<li class="ing"><span>○ ${x}</span><span>${S.have.includes(x)?'✓':'<small>missing</small>'}</span></li>`).join('')}</ul>
+ <h2>Cooking instructions</h2><ol>${r.s.map(x=>`<li>${x}</li>`).join('')}</ol>
+ <button class="cta" data-cook="${k}">${S.cooked[k]?'✓ Cooked today':'Mark as cooked'}</button></div>`},
+
+planner:()=>head()+`<div class="box stack"><div class="days">${DAYS.map((d,i)=>`<button data-day="${i}" class="${i===day?'on':''}">${d}</button>`).join('')}</div>
+ <h2>${FULL[day]}’s meals</h2>${MEALS.map(([m,h],j)=>{const k=S.plan[day+'-'+j];return `<div class="box meal row"><div><h2>${m}</h2><small>${k?R[k].n:h}</small></div><button data-choose="${j}">${k?'Change':'Choose'}</button></div>`}).join('')}</div>
+ <p style="margin:16px 0;font-size:17px">Plan your meals and make busy days easier</p><div class="motto">Vitala. Eat healthy. Save time.</div>`,
+
+water:()=>head()+`<h1>Water Tracker</h1><div class="sub">Keep track of your drinks throughout the day</div><div class="stack">
+ <div class="box center"><div style="color:var(--water)">${ic('drop')}</div><div class="big">${S.water} ml</div><div>Water recorded</div>
+ <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="2000" aria-valuenow="${Math.min(S.water,2000)}"><i style="width:${Math.min(100,S.water/20)}%"></i></div>
+ <small class="sub" style="display:block;margin:0">Illustrative progress against 2000 ml. Your hydration needs may vary.</small>
+ <div class="three">${[150,250,500].map(n=>`<button data-add="${n}">+${n} ml</button>`).join('')}</div><button class="link" data-act="reset">Reset today</button></div>
+ <div class="box center"><h2>Reminders</h2><div>Water reminders</div><small class="sub" style="display:block;margin:0">Every hour while the app is open</small>
+ <button class="switch" role="switch" aria-checked="${S.remind}" aria-label="Water reminders" data-act="remind"><i></i></button></div></div>`,
+
+profile:()=>head(false)+`<button class="link" data-go="home">← Back home</button><div class="row" style="margin-bottom:10px"><h1>My profile</h1><button class="link" data-act="logout">Log out</button></div><div class="stack">
+ <div class="box title-card">${ic('user')}<h2>${esc(S.name)}</h2></div>
+ <div><h2>Personal information</h2>
+ ${[['name','Name','text','Your name'],['age','Age','number','Add age'],['mail','Gmail','email','name@gmail.com']].map(([k,l,t,h])=>`<label class="field"><span>${l}</span><input id="f-${k}" data-field="${k}" type="${t}" placeholder="${h}" value="${esc(S[k])}"></label>`).join('')}</div>
+ <button class="cta" data-act="premium">Buy premium</button>
+ <button class="cta" data-act="install" style="background:none">Install app on this phone</button>
+ <div class="center sub">07.11.2026</div></div>`,
+
+welcome:()=>`<div class="stack center" style="padding-top:40px"><div class="logo" style="font-size:36px">Vitala</div><div class="sub">Eat healthy. Save time.</div>${HERO}
+ <label class="field"><span>Name</span><input id="login" placeholder="Your name" value="${esc(S.name)}"></label><button class="cta" data-act="login">Start</button></div>`
+};
+function chips(){const list=INGREDIENTS.filter(x=>x.toLowerCase().includes(query.trim().toLowerCase()));
+ return list.length?list.map(x=>`<button data-ing="${x}" class="${S.have.includes(x)?'on':''}" aria-pressed="${S.have.includes(x)}">${x}</button>`).join(''):'<small style="grid-column:1/-1">Nothing found. Try another word.</small>'}
+
+function render(top){
+ newDay();
+ const [v,k]=(location.hash.slice(1)||'home').split('-');
+ view=S.out?'welcome':(V[v]&&v!=='welcome'&&(v!=='details'||Object.hasOwn(R,k)))?v:'home';
+ if(view!=='scan'){stopCam();photo=''}
+ const el=$('#app'),y=el.scrollTop;
+ el.innerHTML=V[view](k);
+ el.scrollTop=top?0:y;
+ if(stream&&$('#video'))$('#video').srcObject=stream;
+}
+function go(v){if(location.hash==='#'+v)render(true);else location.hash=v}
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,3500)}
+function sheet(html){const s=$('#sheet');s.innerHTML=html?`<div class="stack">${html}</div>`:'';s.hidden=!html}
+function stopCam(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
+function pickFound(){sheet(`<h2>What is in your photo?</h2><small>This version does not recognize food automatically. Tap the products you see.</small>
+ <div class="chips" style="margin:0">${INGREDIENTS.map(x=>`<button data-found="${x}" class="${found.includes(x)?'on':''}">${x}</button>`).join('')}</div>
+ <button class="cta" data-act="addfound">Add to my ingredients</button><button class="link" data-act="close">Cancel</button>`)}
+function schedule(){clearInterval(timer);if(S.remind)timer=setInterval(()=>{toast('Time to drink some water');
+ try{if(Notification.permission==='granted')navigator.serviceWorker.ready.then(r=>r.showNotification('Vitala',{body:'Time to drink some water'}))}catch(e){}},3600000)}
+
+const ACT={
+ async scan(){photo='';
+  try{const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+   if(view!=='scan'){s.getTracks().forEach(t=>t.stop());return}stream=s;render()}
+  catch(e){render();$('#file').click()}},
+ shoot(){const v=$('#video');if(!v||!v.videoWidth)return toast('Camera is still starting');
+  const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);
+  photo=c.toDataURL('image/jpeg',.8);stopCam();render();found=[];pickFound()},
+ addfound(){const n=found.length;S.have=[...new Set([...S.have,...found])];save();sheet();toast(n?'Ingredients added':'Nothing selected')},
+ close(){sheet()},
+ reset(){S.water=0;save();render()},
+ remind(){S.remind=!S.remind;save();schedule();render();
+  if(S.remind){try{Notification.requestPermission()}catch(e){}toast('Reminders on while the app is open')}},
+ logout(){S.out=true;save();render(true)},
+ login(){S.name=$('#login').value.trim()||'Friend';S.out=false;save();go('home')},
+ premium(){toast('Premium is a concept in this student project. Nothing is charged.')},
+ async install(){
+  if(installEvt){installEvt.prompt();installEvt=null;return}
+  sheet(`<h2>Install Vitala</h2><p><b>iPhone:</b> open the site in Safari, tap Share, then “Add to Home Screen”.</p><p><b>Android:</b> open the site in Chrome, tap ⋮, then “Install app” or “Add to Home screen”.</p><button class="cta" data-act="close">Got it</button>`)}
+};
+document.addEventListener('click',e=>{
+ if(e.target.id==='sheet')return sheet();
+ const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+ if(d.go)go(d.go);
+ else if(d.act)ACT[d.act]();
+ else if(d.ing){S.have=S.have.includes(d.ing)?S.have.filter(x=>x!==d.ing):[...S.have,d.ing];save();render()}
+ else if(d.add){newDay();S.water+=+d.add;save();render()}
+ else if(d.day){day=+d.day;render()}
+ else if(d.cook){S.cooked[d.cook]=!S.cooked[d.cook];save();render();if(S.cooked[d.cook])toast('Nice work! Marked as cooked')}
+ else if(d.choose){sheet(`<h2>${FULL[day]}: ${MEALS[d.choose][0]}</h2>${Object.keys(R).map(k=>`<button class="card" data-pick="${k}" data-slot="${d.choose}"><div class="top"><div><b>${R[k].n}</b><small>${R[k].t} min · ${R[k].k} kcal</small></div></div></button>`).join('')}<button class="link" data-pick="" data-slot="${d.choose}">Clear this meal</button>`)}
+ else if(d.slot){const key=day+'-'+d.slot;if(d.pick)S.plan[key]=d.pick;else delete S.plan[key];save();sheet();render()}
+ else if(d.found){found=found.includes(d.found)?found.filter(x=>x!==d.found):[...found,d.found];pickFound()}
+});
+document.addEventListener('input',e=>{
+ if(e.target.id==='q'){query=e.target.value;$('#chips').innerHTML=chips()}
+ const f=e.target.dataset.field;
+ if(f){S[f]=e.target.value;save();if(f==='name')$('.title-card h2').textContent=e.target.value}
+});
+document.addEventListener('change',e=>{
+ if(e.target.id==='file'&&e.target.files[0]){const r=new FileReader();r.onload=()=>{photo=r.result;render();found=[];pickFound()};r.readAsDataURL(e.target.files[0])}
+});
+addEventListener('hashchange',()=>{sheet();render(true)});
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S.date!==today())render()});
+render(true);schedule();
+</script>
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js')</script>
+</body>
+</html>
