@@ -38,6 +38,7 @@ h1{font-size:25px;font-weight:500;line-height:1.25}
 h2{font-size:16px;font-weight:500}
 .sub{color:var(--soft);font-size:13px;margin-bottom:14px}
 .stack{display:flex;flex-direction:column;gap:11px}
+.stack>*{flex-shrink:0}
 .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .box{border:1.5px solid var(--line);border-radius:16px;padding:13px;min-width:0}
 .cta{width:100%;padding:11px;background:var(--lime);font-weight:500;display:flex;justify-content:center;align-items:center;gap:9px}
@@ -240,7 +241,8 @@ details:k=>{const r=R[k];return head(false)+`<button class="link" data-go="recip
  <button class="cta" data-cook="${k}">${S.cooked[k]?'✓ Cooked today':'Mark as cooked'}</button></div>`},
 
 planner:()=>head()+`<div class="box stack"><div class="days">${DAYS.map((d,i)=>`<button data-day="${i}" class="${i===day?'on':''}">${d}</button>`).join('')}</div>
- <h2>${FULL[day]}’s meals</h2>${MEALS.map(([m,h],j)=>{const k=S.plan[day+'-'+j];return `<div class="box meal row"><div><h2>${m}</h2><small>${k?R[k].n:h}</small></div><button data-choose="${j}">${k?'Change':'Choose'}</button></div>`}).join('')}</div>
+ <h2>${FULL[day]}’s meals</h2>${MEALS.map(([m,h],j)=>{const k=S.plan[day+'-'+j];return `<div class="box meal row"><div style="min-width:0"><h2>${m}</h2>${k&&R[k]?`<button class="link" data-go="details-${k}" style="padding:0;color:var(--ink);text-align:left">${R[k].n}</button><small style="display:block">${R[k].t} min · ${R[k].k} kcal</small>`:`<small>${h}</small>`}</div><button data-choose="${j}">${k?'Change':'Choose'}</button></div>`}).join('')}
+ <small class="center">Planned for ${FULL[day]}: ${MEALS.reduce((n,_,j)=>n+(R[S.plan[day+'-'+j]]?.k||0),0)} kcal</small></div>
  <p style="margin:16px 0;font-size:17px">Plan your meals and make busy days easier</p><div class="motto">Vitala. Eat healthy. Save time.</div>`,
 
 water:()=>head()+`<h1>Water Tracker</h1><div class="sub">Keep track of your drinks throughout the day</div><div class="stack">
@@ -285,6 +287,10 @@ function go(v){if(location.hash==='#'+v)render(true);else location.hash=v}
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,3500)}
 function sheet(html){const s=$('#sheet');s.innerHTML=html?`<div class="stack">${html}</div>`:'';s.hidden=!html}
 function stopCam(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
+function pickList(slot,q){q=q.trim().toLowerCase();
+ const can=matches(),hit=k=>R[k].n.toLowerCase().includes(q)||R[k].i.some(x=>x.toLowerCase().includes(q));
+ const block=(title,keys)=>keys.length?`<h2>${title}</h2>`+keys.map(k=>`<button class="card" data-pick="${k}" data-slot="${slot}"><div class="top">${food(k,'thumb')}<div class="info"><b>${R[k].n}</b><small>${R[k].t} min · ${R[k].k} kcal</small></div></div></button>`).join(''):'';
+ return block('You can cook now',can.filter(hit))+block('Other recipes',Object.keys(R).filter(k=>!can.includes(k)&&hit(k)))||'<small>No recipes found. Try another word.</small>'}
 function pickFound(){const keep=$('#sheet').firstElementChild?.scrollTop||0;
  sheet(`<h2>What is in your photo?</h2><small role="status">${esc(note)}</small>
  <button class="cta" data-act="addfound">Add ${found.length||''} to my ingredients</button>
@@ -347,12 +353,17 @@ document.addEventListener('click',e=>{
  else if(d.add){newDay();S.water+=+d.add;save();render()}
  else if(d.day){day=+d.day;render()}
  else if(d.cook){S.cooked[d.cook]=!S.cooked[d.cook];save();render();if(S.cooked[d.cook])toast('Nice work! Marked as cooked')}
- else if(d.choose){sheet(`<h2>${FULL[day]}: ${MEALS[d.choose][0]}</h2>${[...new Set([...matches(),...Object.keys(R)])].map(k=>`<button class="card" data-pick="${k}" data-slot="${d.choose}"><div class="top"><div><b>${R[k].n}</b><small>${R[k].t} min · ${R[k].k} kcal</small></div></div></button>`).join('')}<button class="link" data-pick="" data-slot="${d.choose}">Clear this meal</button>`)}
+ else if(d.choose){sheet(`<h2>${FULL[day]}: ${MEALS[d.choose][0]}</h2>
+ <label class="search"><input id="pick-q" data-slot-id="${d.choose}" placeholder="Search recipes" aria-label="Search recipes">${ic('find')}</label>
+ <button class="link" data-act="close">Close</button>
+ ${S.plan[day+'-'+d.choose]?`<button class="cta" data-pick="" data-slot="${d.choose}" style="background:none">Clear this meal</button>`:''}
+ <div id="pick-list" class="stack">${pickList(d.choose,'')}</div>`)}
  else if(d.slot){const key=day+'-'+d.slot;if(d.pick)S.plan[key]=d.pick;else delete S.plan[key];save();sheet();render()}
  else if(d.del){S.log=S.log.filter(x=>x.id!==+d.del);save();render()}
  else if(d.found){found=found.includes(d.found)?found.filter(x=>x!==d.found):[...found,d.found];pickFound()}
 });
 document.addEventListener('input',e=>{
+ if(e.target.id==='pick-q')$('#pick-list').innerHTML=pickList(e.target.dataset.slotId,e.target.value);
  if(e.target.id==='q'){query=e.target.value;$('#chips').innerHTML=chips()}
  const f=e.target.dataset.field;
  if(f){S[f]=e.target.value;save();if($('#burn'))$('#burn').innerHTML=burnHTML();if(f==='name')$('.title-card h2').textContent=e.target.value}
