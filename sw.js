@@ -1,4 +1,4 @@
-const CACHE='vitala-721b6125';
+const CACHE='vitala-33f5bd28';
 const FILES=["./", "apple-touch-icon.png", "icon-192.png", "icon-512.png", "icon-maskable.png", "index.html", "manifest.webmanifest", "poppins-400.ttf", "poppins-500.ttf"];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>Promise.allSettled(FILES.map(f=>c.add(f)))))});
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(n=>n.startsWith('vitala-')&&n!==CACHE).map(n=>caches.delete(n)))).then(()=>clients.claim())));

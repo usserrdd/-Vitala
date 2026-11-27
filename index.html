@@ -56,6 +56,13 @@ h2{font-size:16px;font-weight:500}
 .chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:13px}
 .chips button{padding:9px 2px;font-size:13px;border-radius:12px;min-width:0;overflow-wrap:anywhere}
 .cat{margin-top:14px;font-size:14px}
+.swatches{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin-top:8px}
+.swatches button{border:0;border-radius:10px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:2px 0}
+.swatches i{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-style:normal}
+.swatches small{font-size:11px}
+.born{padding-top:6px}.dob{display:grid;grid-template-columns:1fr 1.5fr 1.1fr;gap:8px;margin-top:6px}
+.dob select{border:1.5px solid var(--line);border-radius:12px;padding:7px 4px;text-align:center;min-width:0;width:100%}
+.code{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:10px;text-align:center;font-size:22px;letter-spacing:.3em;background:none}
 .ava{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
 .big-ava{width:96px;height:96px;margin:0 auto 6px;border:1.5px solid var(--line)}
 .ava-actions{display:flex;justify-content:center;align-items:center;gap:10px;margin-top:8px}
@@ -160,7 +167,7 @@ const note4=m=>[...m.swap.map(([a,b])=>`${a} → ${b}`),m.skip.length?`without $
 const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],FULL=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 const MEALS=[['Breakfast','Choose a recipe'],['Lunch','Choose a recipe'],['Dinner','Plan something delicious']];
 const today=()=>new Date().toLocaleDateString('en-CA');
-const FRESH={avatar:'',sex:'female',height:'',weight:'',activity:'walk',minutes:'',log:[],custom:[],have:['Eggs','Tomatoes','Bread','Pasta','Chicken','Rice','Cheese','Spinach'],water:750,date:today(),plan:{'0-0':'toast'},cooked:{},remind:false,name:'Asiya',age:'',mail:'',out:false};
+const FRESH={color:'lime',dob:{d:'',m:'',y:''},verified:'',avatar:'',sex:'female',height:'',weight:'',activity:'walk',minutes:'',log:[],custom:[],have:['Eggs','Tomatoes','Bread','Pasta','Chicken','Rice','Cheese','Spinach'],water:750,date:today(),plan:{'0-0':'toast'},cooked:{},remind:false,name:'Asiya',age:'',mail:'',out:false};
 let S=structuredClone(FRESH);
 try{Object.assign(S,JSON.parse(localStorage.getItem('vitala')||'{}'))}catch(e){}
 const save=()=>{try{localStorage.setItem('vitala',JSON.stringify(S))}catch(e){}};
@@ -180,13 +187,30 @@ const HERO=`<svg class="hero" viewBox="0 0 360 150" role="img" aria-label="Plate
 const noImg=new Set();
 const TINT={toast:['#e8b45c','#d9503f','#f4d23c'],omelette:['#f2c94c','#4f8a3c','#f6e08a'],pasta:['#e9a15a','#c8483a','#f4d8a0'],bowl:['#f3efe0','#b9793e','#6fa84f'],salad:['#d9503f','#5f9e48','#f6efd8'],pancakes:['#d9a05a','#f2d268','#b9783c'],skillet:['#e2b659','#8d6a4c','#c98f3d'],friedrice:['#e9cf7a','#e57d32','#6fa84f'],broccoli:['#4f8a3c','#c58a4c','#74a85a'],sandwich:['#dcae6a','#d8a79a','#7fb069'],fruit:['#f7f2e6','#d9475a','#f2d268'],soup:['#b5562f','#e57d32','#d9b36a']};
 function art(k,cls){const [a,b,c]=TINT[k]||['#e9b45c','#6fa84f','#d9604f'];const bits=[[150,62,24,a],[205,58,19,b],[190,96,23,c],[142,100,15,b],[220,90,16,a],[170,78,13,c]];
- return `<svg class="${cls}" viewBox="0 0 360 150" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Drawing of ${R[k].n}"><rect width="360" height="150" fill="#eef7bd"/><circle cx="180" cy="75" r="68" fill="#fdfdfb" stroke="#4a4a47" stroke-width="2"/>${bits.map(([x,y,r,f])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${f}" stroke="#4a4a47" stroke-width="1.5"/>`).join('')}</svg>`}
+ return `<svg class="${cls}" viewBox="0 0 360 150" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Drawing of ${R[k].n}"><rect width="360" height="150" style="fill:var(--wash)"/><circle cx="180" cy="75" r="68" fill="#fdfdfb" stroke="#4a4a47" stroke-width="2"/>${bits.map(([x,y,r,f])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${f}" stroke="#4a4a47" stroke-width="1.5"/>`).join('')}</svg>`}
 const food=(k,cls)=>noImg.has(k)?art(k,cls):`<img class="${cls}" data-food="${k}" src="recipe-${k}.jpg" alt="${R[k].n}">`;
 document.addEventListener('error',e=>{const k=e.target.dataset?.food;if(k){noImg.add(k);e.target.outerHTML=art(k,e.target.className)}},true);
 let noPhoto=false;
 const hero=()=>noPhoto?HERO:'<img class="hero" src="hero.jpg" alt="Fresh food">';
 document.addEventListener('error',e=>{if(e.target.matches?.('img.hero')){noPhoto=true;e.target.outerHTML=HERO}},true);
 const avatar=cls=>`<img class="${cls}" src="${esc(S.avatar)}" alt="">`;
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const daysIn=(m,y)=>m?new Date(Number(y)||2000,Number(m),0).getDate():31;
+function ageFrom({d,m,y},now=new Date()){if(!d||!m||!y)return'';
+ const had=now.getMonth()+1>+m||(now.getMonth()+1===+m&&now.getDate()>=+d),age=now.getFullYear()-y-(had?0:1);
+ return age<0?'':String(age)}
+const syncAge=()=>{if(S.dob.d&&S.dob.m&&S.dob.y)S.age=ageFrom(S.dob)};
+const pick=(key,label,items)=>`<select id="dob-${key}" data-dob="${key}" aria-label="${label}"><option value="">${label}</option>${items.map(([v,t])=>`<option value="${v}" ${S.dob[key]===String(v)?'selected':''}>${t}</option>`).join('')}</select>`;
+function birthHTML(){const year=new Date().getFullYear();
+ return `<div class="born"><span>Date of birth</span><div class="dob">${pick('d','Day',Array.from({length:daysIn(S.dob.m,S.dob.y)},(_,i)=>[i+1,i+1]))}${pick('m','Month',MONTHS.map((n,i)=>[i+1,n]))}${pick('y','Year',Array.from({length:101},(_,i)=>[year-i,year-i]))}</div></div>
+ <div class="field"><span>Age</span><span>${S.age?esc(S.age):'Choose your date of birth'}</span></div>`}
+const validMail=m=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(m);
+const mailHTML=()=>S.mail&&S.verified===S.mail?'<small>✓ Email confirmed (demo)</small>':'<button class="pill" data-act="verify">Confirm email</button>';
+let code='';
+// [name, accent, light tint]
+const COLORS={lime:['Lime','#d6ee5c','#eef7bd'],pink:['Pink','#ffb3cd','#ffe3ec'],blue:['Blue','#a9d4ff','#ddeeff'],lilac:['Lilac','#d3bdfa','#ede4fd'],peach:['Peach','#ffc59a','#ffe8d6'],mint:['Mint','#a8e8c8','#daf5e8']};
+function paint(){const [,main,soft]=COLORS[S.color]||COLORS.lime,st=document.documentElement.style;st.setProperty('--lime',main);st.setProperty('--wash',soft)}
+const colorCard=()=>`<div class="box"><h2>App color</h2><div class="swatches">${Object.entries(COLORS).map(([k,[n,main]])=>`<button data-color="${k}" aria-pressed="${S.color===k}" aria-label="${n}"><i style="background:${main}">${S.color===k?'✓':''}</i><small>${n}</small></button>`).join('')}</div></div>`;
 const TABS=[['home','Home'],['ingredients','Ingredients'],['recipes','Recipes'],['planner','Planner'],['water','Water']];
 const head=(tabs=true,cur=view)=>`<header><div class="logo">Vitala</div><button class="round" data-go="profile" aria-label="My profile">${S.avatar?avatar('ava'):ic('user')}</button></header>`+
  (tabs?`<nav>${TABS.map(([v,l])=>`<button data-go="${v}" class="${v===cur?'on':''}">${l}</button>`).join('')}</nav>`:'');
@@ -197,7 +221,7 @@ const inRange=(v,a,b)=>Number(v)>=a&&Number(v)<=b;
 const bmr=(sex,w,h,a)=>10*w+6.25*h-5*a+(sex==='male'?5:-161);
 const burned=(met,w,min)=>(met-1)*w*min/60;
 function burnHTML(){
- if(!(inRange(S.age,18,100)&&inRange(S.height,120,230)&&inRange(S.weight,35,250)))return '<small>Enter your age (18 or older), height in cm and weight in kg to see your estimate.</small>';
+ if(!(inRange(S.age,18,100)&&inRange(S.height,120,230)&&inRange(S.weight,35,250)))return '<small>Choose your date of birth (18 or older) and enter height in cm and weight in kg to see your estimate.</small>';
  const now=new Date(),part=(now.getHours()*60+now.getMinutes())/1440;
  const rest=Math.round(bmr(S.sex,+S.weight,+S.height,+S.age)*part),list=S.log.filter(x=>x.date===today());
  const act=list.reduce((n,x)=>n+x.kcal,0),all=S.log.reduce((n,x)=>n+x.kcal,0);
@@ -264,7 +288,10 @@ profile:()=>head(false)+`<button class="link" data-go="home">← Back home</butt
  <div class="box title-card">${S.avatar?avatar('ava big-ava'):ic('user')}<h2>${esc(S.name)}</h2>
  <div class="ava-actions"><label class="pill">${S.avatar?'Change photo':'Add photo'}<input type="file" id="ava-file" accept="image/*" class="sr"></label>${S.avatar?'<button class="link" data-act="noava">Remove</button>':''}</div></div>
  <div><h2>Personal information</h2>
- ${[['name','Name','text','Your name'],['age','Age','number','Add age'],['mail','Gmail','email','name@gmail.com']].map(([k,l,t,h])=>`<label class="field"><span>${l}</span><input id="f-${k}" data-field="${k}" type="${t}" placeholder="${h}" value="${esc(S[k])}"></label>`).join('')}</div>
+ ${[['name','Name','text','Your name'],['mail','Gmail','email','name@gmail.com']].map(([k,l,t,h])=>`<label class="field"><span>${l}</span><input id="f-${k}" data-field="${k}" type="${t}" placeholder="${h}" value="${esc(S[k])}"></label>`).join('')}
+ <div id="mail-status" style="padding:8px 0;text-align:right">${mailHTML()}</div>
+ ${birthHTML()}</div>
+ ${colorCard()}
  ${burnCard()}
  <button class="cta" data-act="premium">Buy premium</button>
  <button class="cta" data-act="install" style="background:none">Install app on this phone</button>
@@ -281,7 +308,7 @@ function chips(){const q=query.trim().toLowerCase();
  return html+(q&&!exact?`<button class="cta" data-act="custom" style="margin-top:12px">+ Add “${esc(query.trim())}”</button>`:'')}
 
 function render(top){
- newDay();
+ newDay();syncAge();paint();
  const [v,k]=(location.hash.slice(1)||'home').split('-');
  view=S.out?'welcome':(V[v]&&v!=='welcome'&&(v!=='details'||Object.hasOwn(R,k)))?v:'home';
  if(view!=='scan'){stopCam();photo=''}
@@ -344,8 +371,12 @@ const ACT={
   photo=c.toDataURL('image/jpeg',.8);stopCam();render();recognize()},
  addfound(){scanId++;const n=found.length;S.have=[...new Set([...S.have,...found])];save();sheet();toast(n?'Ingredients added':'Nothing selected')},
  close(){scanId++;sheet()},
+ verify(){if(!validMail(S.mail))return toast('Enter a correct email first, like name@gmail.com');
+  code=String(1000+Math.floor(Math.random()*9000));
+  sheet(`<h2>Confirm your email</h2><p>This is a demo, so no email is sent to ${esc(S.mail)}.</p><p>Your demo code is <b>${code}</b></p><input class="code" id="code" inputmode="numeric" maxlength="4" aria-label="Code" placeholder="0000"><button class="cta" data-act="checkcode">Confirm</button><button class="link" data-act="close">Cancel</button>`)},
+ checkcode(){if($('#code').value.trim()!==code)return toast('Wrong code. Check it and try again.');S.verified=S.mail;save();sheet();render();toast('Email confirmed (demo)')},
  noava(){S.avatar='';save();render()},
- addburn(){if(!(inRange(S.age,18,100)&&inRange(S.weight,35,250)&&inRange(S.height,120,230)))return toast('Fill in age (18+), height and weight first');
+ addburn(){if(!(inRange(S.age,18,100)&&inRange(S.weight,35,250)&&inRange(S.height,120,230)))return toast('Fill in date of birth (18+), height and weight first');
   const min=Number(S.minutes);if(!inRange(min,1,600))return toast('Enter minutes from 1 to 600');
   S.log.push({id:Date.now(),date:today(),a:S.activity,min,kcal:Math.round(burned(MET[S.activity][1],+S.weight,min))});S.minutes='';save();render();toast('Activity added')},
  custom(){const x=query.trim().slice(0,30);if(!x)return;S.custom.push(x);S.have.push(x);query='';save();render()},
@@ -376,6 +407,7 @@ document.addEventListener('click',e=>{
  ${S.plan[day+'-'+d.choose]?`<button class="cta" data-pick="" data-slot="${d.choose}" style="background:none">Clear this meal</button>`:''}
  <div id="pick-list" class="stack">${pickList(d.choose,'')}</div>`)}
  else if(d.slot){const key=day+'-'+d.slot;if(d.pick)S.plan[key]=d.pick;else delete S.plan[key];save();sheet();render()}
+ else if(d.color){S.color=d.color;save();render()}
  else if(d.del){S.log=S.log.filter(x=>x.id!==+d.del);save();render()}
  else if(d.found){found=found.includes(d.found)?found.filter(x=>x!==d.found):[...found,d.found];pickFound()}
 });
@@ -383,9 +415,13 @@ document.addEventListener('input',e=>{
  if(e.target.id==='pick-q')$('#pick-list').innerHTML=pickList(e.target.dataset.slotId,e.target.value);
  if(e.target.id==='q'){query=e.target.value;$('#chips').innerHTML=chips()}
  const f=e.target.dataset.field;
- if(f){S[f]=e.target.value;save();if($('#burn'))$('#burn').innerHTML=burnHTML();if(f==='name')$('.title-card h2').textContent=e.target.value}
+ if(f){S[f]=e.target.value;save();if(f==='mail')$('#mail-status').innerHTML=mailHTML();if($('#burn'))$('#burn').innerHTML=burnHTML();if(f==='name')$('.title-card h2').textContent=e.target.value}
 });
 document.addEventListener('change',e=>{
+ const part=e.target.dataset.dob;
+ if(part){S.dob={...S.dob,[part]:e.target.value};
+  if(+S.dob.d>daysIn(S.dob.m,S.dob.y))S.dob.d='';
+  S.age=ageFrom(S.dob);save();render()}
  if(e.target.id==='ava-file'&&e.target.files[0])setAvatar(e.target.files[0]);
  if(e.target.id==='file'&&e.target.files[0]){const r=new FileReader();r.onload=()=>{stopCam();photo=r.result;render();recognize()};r.readAsDataURL(e.target.files[0])}
 });
