@@ -167,7 +167,7 @@ const note4=m=>[...m.swap.map(([a,b])=>`${a} → ${b}`),m.skip.length?`without $
 const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],FULL=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 const MEALS=[['Breakfast','Choose a recipe'],['Lunch','Choose a recipe'],['Dinner','Plan something delicious']];
 const today=()=>new Date().toLocaleDateString('en-CA');
-const FRESH={color:'lime',dob:{d:'',m:'',y:''},verified:'',avatar:'',sex:'female',height:'',weight:'',activity:'walk',minutes:'',log:[],custom:[],have:['Eggs','Tomatoes','Bread','Pasta','Chicken','Rice','Cheese','Spinach'],water:750,date:today(),plan:{'0-0':'toast'},cooked:{},remind:false,name:'Asiya',age:'',mail:'',out:false};
+const FRESH={signed:false,color:'lime',dob:{d:'',m:'',y:''},verified:'',avatar:'',sex:'female',height:'',weight:'',activity:'walk',minutes:'',log:[],custom:[],have:['Eggs','Tomatoes','Bread','Pasta','Chicken','Rice','Cheese','Spinach'],water:750,date:today(),plan:{'0-0':'toast'},cooked:{},remind:false,name:'',age:'',mail:'',out:false};
 let S=structuredClone(FRESH);
 try{Object.assign(S,JSON.parse(localStorage.getItem('vitala')||'{}'))}catch(e){}
 const save=()=>{try{localStorage.setItem('vitala',JSON.stringify(S))}catch(e){}};
@@ -297,8 +297,12 @@ profile:()=>head(false)+`<button class="link" data-go="home">← Back home</butt
  <button class="cta" data-act="install" style="background:none">Install app on this phone</button>
  <div class="center sub">07.11.2026</div></div>`,
 
-welcome:()=>`<div class="stack center" style="padding-top:40px"><div class="logo" style="font-size:36px">Vitala</div><div class="sub">Eat healthy. Save time.</div>${hero()}
- <label class="field"><span>Name</span><input id="login" placeholder="Your name" value="${esc(S.name)}"></label><button class="cta" data-act="login">Start</button></div>`
+welcome:()=>`<div class="stack center" style="padding-top:28px"><div class="logo" style="font-size:36px">Vitala</div><div class="sub" style="margin:0">Eat healthy. Save time.</div>${hero()}
+ <h1>Sign in to your account</h1><div class="sub" style="margin:0">Enter your details to start cooking</div>
+ <label class="field"><span>Name</span><input id="login" autocomplete="given-name" placeholder="Your name" value="${S.signed?esc(S.name):''}"></label>
+ <label class="field"><span>Email</span><input id="login-mail" type="email" autocomplete="email" placeholder="name@gmail.com" value="${S.signed?esc(S.mail):''}"></label>
+ <button class="cta" data-act="login">Sign in</button>
+ <small class="sub" style="margin:0">Your account is saved only on this phone. No password is needed.</small></div>`
 };
 const groups=()=>Object.entries({...CATS,...(S.custom.length?{'Added by you':S.custom}:{})});
 const grid=(list,attr,sel)=>`<div class="chips">${list.map(x=>`<button data-${attr}="${esc(x)}" class="${sel.includes(x)?'on':''}" aria-pressed="${sel.includes(x)}">${esc(x)}</button>`).join('')}</div>`;
@@ -310,7 +314,7 @@ function chips(){const q=query.trim().toLowerCase();
 function render(top){
  newDay();syncAge();paint();
  const [v,k]=(location.hash.slice(1)||'home').split('-');
- view=S.out?'welcome':(V[v]&&v!=='welcome'&&(v!=='details'||Object.hasOwn(R,k)))?v:'home';
+ view=(S.out||!S.signed)?'welcome':(V[v]&&v!=='welcome'&&(v!=='details'||Object.hasOwn(R,k)))?v:'home';
  if(view!=='scan'){stopCam();photo=''}
  const el=$('#app'),y=el.scrollTop,cy=$('#chips')?.scrollTop;
  el.innerHTML=V[view](k);
@@ -385,7 +389,12 @@ const ACT={
  remind(){S.remind=!S.remind;save();schedule();render();
   if(S.remind){try{Notification.requestPermission()}catch(e){}toast('Reminders on while the app is open')}},
  logout(){S.out=true;save();render(true)},
- login(){S.name=$('#login').value.trim()||'Friend';S.out=false;save();go('home')},
+ login(){const name=$('#login').value.trim(),mail=$('#login-mail').value.trim();
+  if(!name)return toast('Please enter your name');
+  if(!validMail(mail))return toast('Enter a correct email, like name@gmail.com');
+  // another person on the same phone must not see the previous profile
+  if(S.signed&&S.mail&&mail.toLowerCase()!==S.mail.toLowerCase())Object.assign(S,{avatar:'',verified:'',dob:{d:'',m:'',y:''},age:'',height:'',weight:'',log:[],plan:{},cooked:{},water:0});
+  S.name=name;S.mail=mail;S.signed=true;S.out=false;save();go('home')},
  premium(){toast('Premium is a concept in this student project. Nothing is charged.')},
  async install(){
   if(installEvt){installEvt.prompt();installEvt=null;return}
@@ -425,6 +434,7 @@ document.addEventListener('change',e=>{
  if(e.target.id==='ava-file'&&e.target.files[0])setAvatar(e.target.files[0]);
  if(e.target.id==='file'&&e.target.files[0]){const r=new FileReader();r.onload=()=>{stopCam();photo=r.result;render();recognize()};r.readAsDataURL(e.target.files[0])}
 });
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.target.id==='login'||e.target.id==='login-mail'))ACT.login()});
 addEventListener('hashchange',()=>{sheet();render(true)});
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S.date!==today())render()});
