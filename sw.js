@@ -1,6 +1,6 @@
-const CACHE='vitala-6c15fc1d';
+const CACHE='vitala-c950d493';
 const FILES=["./", "apple-touch-icon.png", "icon-192.png", "icon-512.png", "icon-maskable.png", "index.html", "manifest.webmanifest", "poppins-400.ttf", "poppins-500.ttf"];
-self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)))});
+self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>Promise.allSettled(FILES.map(f=>c.add(f)))))});
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(n=>n.startsWith('vitala-')&&n!==CACHE).map(n=>caches.delete(n)))).then(()=>clients.claim())));
 // network first so updates show up, cache when offline
 self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;

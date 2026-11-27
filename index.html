@@ -53,7 +53,11 @@ h2{font-size:16px;font-weight:500}
 .search input{border:0;background:none;flex:1;min-width:0;outline:0}
 .search:focus-within{outline:3px solid var(--water)}
 .chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:13px}
-.chips button{padding:9px 2px;font-size:14px;border-radius:12px}
+.chips button{padding:9px 2px;font-size:13px;border-radius:12px;min-width:0;overflow-wrap:anywhere}
+.cat{margin-top:14px;font-size:14px}
+#chips{max-height:42vh;overflow-y:auto;padding:2px 4px 2px 2px;margin-top:6px}
+img.hero{aspect-ratio:12/5;object-fit:cover}
+label.cta{border:1.5px solid var(--line);border-radius:999px;cursor:pointer;background:none}
 .finder{aspect-ratio:3/4;max-height:56vh;width:100%;border:7px solid var(--lime);outline:1.5px solid var(--line);border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:14px;position:relative;overflow:hidden}
 .finder video,.finder img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .title-card{background:var(--wash);text-align:center}
@@ -88,7 +92,15 @@ ol{padding-left:20px;font-size:14px}
 <div id="sheet" class="sheet" hidden></div>
 <div id="toast" role="status" hidden></div>
 <script>
-const INGREDIENTS=['Eggs','Tomatoes','Bread','Pasta','Chicken','Rice','Milk','Cheese','Flour','Cucumber','Potatoes','Spinach'];
+const CATS={
+ 'Popular':['Eggs','Tomatoes','Bread','Pasta','Chicken','Rice','Milk','Cheese','Flour','Cucumber','Potatoes','Spinach'],
+ 'Vegetables':['Carrots','Onion','Garlic','Bell pepper','Broccoli','Cauliflower','Cabbage','Zucchini','Eggplant','Mushrooms','Pumpkin','Corn','Peas','Lettuce','Beetroot','Herbs'],
+ 'Fruits':['Apples','Bananas','Oranges','Lemons','Strawberries','Pineapple','Pears','Grapes','Peaches','Berries','Avocado'],
+ 'Meat and fish':['Beef','Lamb','Turkey','Sausages','Minced meat','Salmon','Tuna','Shrimp'],
+ 'Dairy':['Yogurt','Butter','Sour cream','Cream','Cottage cheese','Kefir'],
+ 'Grains and beans':['Oats','Buckwheat','Noodles','Lentils','Beans','Chickpeas','Tortillas'],
+ 'Pantry':['Olive oil','Sunflower oil','Honey','Sugar','Salt','Nuts','Tomato paste','Soy sauce','Mayonnaise']
+};
 const R={
  toast:{n:'Tomato Egg Toast',t:10,k:285,p:15,c:29,f:11,d:'Crisp toast topped with egg and fresh tomatoes',i:['Eggs','Tomatoes','Bread'],
   s:['Prepare and wash all ingredients.','Toast the bread. Heat a pan with a little cooking oil.','Fry the egg and slice the tomatoes.','Put them on the toast, serve and enjoy!']},
@@ -97,17 +109,33 @@ const R={
  pasta:{n:'Creamy Tomato Pasta',t:20,k:420,p:14,c:58,f:14,d:'Pasta in a creamy tomato sauce',i:['Pasta','Tomatoes','Milk','Cheese'],
   s:['Boil the pasta in salted water.','Cook chopped tomatoes in a pan until soft.','Stir in milk and cheese.','Mix with the pasta, serve and enjoy!']},
  bowl:{n:'Chicken Rice Bowl',t:25,k:480,p:35,c:55,f:12,d:'Warm rice with chicken and crunchy cucumber',i:['Chicken','Rice','Cucumber'],
-  s:['Cook the rice.','Cut the chicken and cook it fully in a pan.','Slice the cucumber.','Put everything in a bowl, serve and enjoy!']}
+  s:['Cook the rice.','Cut the chicken and cook it fully in a pan.','Slice the cucumber.','Put everything in a bowl, serve and enjoy!']},
+ salad:{n:"Fresh Veggie Salad",t:10,k:190,p:7,c:12,f:13,d:"Crunchy salad with cheese",i:["Tomatoes", "Cucumber", "Cheese", "Olive oil"],
+  s:["Wash the vegetables.", "Chop the tomatoes and cucumber.", "Add the cheese and olive oil.", "Mix, serve and enjoy!"]},
+ pancakes:{n:"Banana Oat Pancakes",t:20,k:330,p:13,c:48,f:9,d:"Soft pancakes with banana and oats",i:["Bananas", "Oats", "Eggs", "Milk"],
+  s:["Mash the banana.", "Mix it with oats, egg and milk.", "Fry small pancakes on both sides.", "Serve and enjoy!"]},
+ skillet:{n:"Potato Mushroom Skillet",t:30,k:310,p:7,c:42,f:13,d:"Golden potatoes with mushrooms",i:["Potatoes", "Mushrooms", "Onion", "Sunflower oil"],
+  s:["Wash and slice everything.", "Fry the potatoes in oil until almost soft.", "Add onion and mushrooms and cook through.", "Serve and enjoy!"]},
+ friedrice:{n:"Veggie Fried Rice",t:20,k:390,p:12,c:62,f:10,d:"Rice with egg and vegetables",i:["Rice", "Eggs", "Carrots", "Peas", "Soy sauce"],
+  s:["Cook the rice and let it cool a little.", "Fry the carrots and peas.", "Push aside and scramble the egg.", "Add rice and soy sauce, stir and enjoy!"]},
+ broccoli:{n:"Chicken and Broccoli",t:25,k:360,p:38,c:10,f:18,d:"Juicy chicken with garlic broccoli",i:["Chicken", "Broccoli", "Garlic", "Olive oil"],
+  s:["Cut the chicken and broccoli.", "Cook the chicken fully in oil.", "Add broccoli and garlic and cook until tender.", "Serve and enjoy!"]},
+ sandwich:{n:"Tuna Sandwich",t:10,k:320,p:22,c:30,f:12,d:"Quick sandwich with tuna and cucumber",i:["Bread", "Tuna", "Cucumber", "Mayonnaise"],
+  s:["Drain the tuna.", "Mix it with mayonnaise.", "Slice the cucumber.", "Fill the bread and enjoy!"]},
+ fruit:{n:"Yogurt Fruit Bowl",t:5,k:230,p:9,c:40,f:4,d:"Sweet breakfast bowl",i:["Yogurt", "Bananas", "Strawberries", "Honey"],
+  s:["Wash the strawberries.", "Slice the fruit.", "Spoon yogurt into a bowl.", "Add fruit and honey and enjoy!"]},
+ soup:{n:"Beef Vegetable Soup",t:60,k:340,p:26,c:28,f:13,d:"Warm and filling soup",i:["Beef", "Potatoes", "Carrots", "Onion"],
+  s:["Cut the beef and vegetables.", "Simmer the beef until nearly tender.", "Add the vegetables and cook until soft.", "Season, serve and enjoy!"]}
 };
 const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],FULL=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 const MEALS=[['Breakfast','Choose a recipe'],['Lunch','Choose a recipe'],['Dinner','Plan something delicious']];
 const today=()=>new Date().toLocaleDateString('en-CA');
-const FRESH={have:['Eggs','Tomatoes','Bread','Pasta','Chicken','Rice','Cheese','Spinach'],water:750,date:today(),plan:{'0-0':'toast'},cooked:{},remind:false,name:'Asiya',age:'',mail:'',out:false};
+const FRESH={custom:[],have:['Eggs','Tomatoes','Bread','Pasta','Chicken','Rice','Cheese','Spinach'],water:750,date:today(),plan:{'0-0':'toast'},cooked:{},remind:false,name:'Asiya',age:'',mail:'',out:false};
 let S=structuredClone(FRESH);
 try{Object.assign(S,JSON.parse(localStorage.getItem('vitala')||'{}'))}catch(e){}
 const save=()=>{try{localStorage.setItem('vitala',JSON.stringify(S))}catch(e){}};
 function newDay(){if(S.date!==today()){S.date=today();S.water=0;S.cooked={};save()}}
-let day=(new Date().getDay()+6)%7,query='',stream=null,photo='',found=[],installEvt=null,timer=null,view='home';
+let scanId=0,note='',day=(new Date().getDay()+6)%7,query='',stream=null,photo='',found=[],installEvt=null,timer=null,view='home';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 const P={user:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="9.5" r="3"/><path d="M5.8 19c1.2-5 11.2-5 12.4 0"/>',
@@ -119,6 +147,9 @@ const P={user:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="9.5" r="3"/><
 const ic=n=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
 const HERO=`<svg class="hero" viewBox="0 0 360 150" role="img" aria-label="Plate with fried eggs and sausages"><rect width="360" height="150" fill="#b9806c"/><path d="M0 38 360 26M0 112 360 122" stroke="#a46c59" stroke-width="3" fill="none"/><ellipse cx="180" cy="75" rx="96" ry="68" fill="#fdfdfb" stroke="#4a4a47" stroke-width="2"/><ellipse cx="180" cy="75" rx="76" ry="52" fill="none" stroke="#bbb" stroke-width="1.5"/><path d="M122 52c4-24 40-22 48-10 24-6 34 28 10 32-8 16-44 12-44-2-12-2-18-12-14-20z" fill="#fff" stroke="#4a4a47" stroke-width="1.5"/><path d="M185 62c10-20 48-16 46 4 16 14-6 34-24 24-22 8-36-14-22-28z" fill="#fff" stroke="#4a4a47" stroke-width="1.5"/><circle cx="150" cy="55" r="13" fill="#f4d23c"/><circle cx="208" cy="73" r="13" fill="#f4d23c"/><g stroke-linecap="round" fill="none"><path d="M135 90l34 24M158 87l32 22" stroke="#4a4a47" stroke-width="15"/><path d="M135 90l34 24M158 87l32 22" stroke="#d9776d" stroke-width="12"/></g></svg>`;
 
+let noPhoto=false;
+const hero=()=>noPhoto?HERO:'<img class="hero" src="hero.jpg" alt="Fresh food">';
+document.addEventListener('error',e=>{if(e.target.matches?.('img.hero')){noPhoto=true;e.target.outerHTML=HERO}},true);
 const TABS=[['home','Home'],['ingredients','Ingredients'],['recipes','Recipes'],['planner','Planner'],['water','Water']];
 const head=(tabs=true,cur=view)=>`<header><div class="logo">Vitala</div><button class="round" data-go="profile" aria-label="My profile">${ic('user')}</button></header>`+
  (tabs?`<nav>${TABS.map(([v,l])=>`<button data-go="${v}" class="${v===cur?'on':''}">${l}</button>`).join('')}</nav>`:'');
@@ -126,22 +157,22 @@ const have=r=>r.i.filter(x=>S.have.includes(x)).length;
 const ranked=()=>Object.keys(R).sort((a,b)=>have(R[b])/R[b].i.length-have(R[a])/R[a].i.length);
 
 const V={
-home:()=>head()+`<div class="stack"><div><h1>Hello, ${esc(S.name)}!</h1><div class="sub" style="margin:0">What are we cooking today?</div></div>${HERO}
+home:()=>head()+`<div class="stack">${installed()?'':'<button class="cta" data-act="install" style="background:none">Download the app</button>'}<div><h1>Hello, ${esc(S.name)}!</h1><div class="sub" style="margin:0">What are we cooking today?</div></div>${hero()}
  <button class="cta" data-go="ingredients">+ Add your ingredients</button>
  <div class="row"><h2>Recommended for you</h2><button class="link" data-go="recipes">See all</button></div>
  ${['toast','omelette'].map(k=>`<button class="card" data-go="details-${k}"><div class="top"><div><b>${R[k].n}</b><small>${R[k].t} min · ${R[k].k} kcal</small></div>${ic('go')}</div></button>`).join('')}
  <div class="box row" style="border-radius:18px"><button class="plain" data-go="water">${ic('drop')}<span><small>Water recorded</small><br><span style="font-size:22px">${S.water} ml</span></span></button><button class="round" data-add="250" aria-label="Add 250 ml of water" style="font-size:22px">+</button></div></div>`,
 
 ingredients:()=>head()+`<h1>My Ingredients</h1><div class="sub">Select the food you have in your kitchen</div><div class="stack">
- <div class="box"><label class="search"><input id="q" placeholder="Find ingredients" aria-label="Find ingredients" value="${esc(query)}">${ic('find')}</label><div class="chips" id="chips">${chips()}</div></div>
+ <div class="box"><label class="search"><input id="q" placeholder="Find ingredients" aria-label="Find ingredients" value="${esc(query)}">${ic('find')}</label><div id="chips">${chips()}</div></div>
  <button class="cta" data-go="recipes">Find my recipes →</button>
  <div class="box row" style="justify-content:flex-start">${ic('carrot')}<span>${S.have.length} ingredients added</span></div>
  <button class="plain" data-go="scan">${ic('cam')}<span>Scan ingredients instead</span></button></div>`,
 
-scan:()=>head(false)+`<button class="link" data-go="ingredients">← Back to ingredients</button><h1>Scan Ingredients</h1><div class="sub">Recognize products in your fridge with your camera</div><div class="stack">
- <div class="finder">${photo?`<img src="${photo}" alt="Your photo">`:stream?'<video id="video" autoplay playsinline muted></video>':`${ic('frame')}<h2>Camera scanner</h2><div class="sub" style="margin:0">Place your ingredients inside the frame</div>${ic('cam')}`}</div>
+scan:()=>head(false)+`<button class="link" data-go="ingredients">← Back to ingredients</button><h1>Scan Ingredients</h1><div class="sub">Show one product at a time, close to the camera</div><div class="stack">
+ <div class="finder">${photo?`<img id="shot" src="${photo}" alt="Your photo">`:stream?'<video id="video" autoplay playsinline muted></video>':`${ic('frame')}<h2>Camera scanner</h2><div class="sub" style="margin:0">Place your ingredient inside the frame</div>${ic('cam')}`}</div>
  <button class="cta" data-act="${stream?'shoot':'scan'}">${ic('cam')}${stream?'Take photo':photo?'Scan again':'Start scanning'}</button>
- <input type="file" id="file" accept="image/*" capture="environment" hidden></div>`,
+ <label class="cta">Take or choose a photo<input type="file" id="file" accept="image/*" hidden></label></div>`,
 
 recipes:()=>head()+`<h1>Recipe Suggestions</h1><div class="row sub"><span>${S.have.length} ingredients selected</span><button data-go="ingredients" style="padding:2px 14px">Edit</button></div><div class="stack">
  ${ranked().map(k=>{const r=R[k];return `<button class="card" data-go="details-${k}"><div class="top"><div><b>${r.n}</b><small>${r.t} min · Easy · you have ${have(r)} of ${r.i.length}</small></div>${ic('go')}</div><div class="macro"><span>${r.k} kcal</span><span>Protein ${r.p}g</span><span>Fat ${r.f}g</span></div></button>`}).join('')}</div>`,
@@ -173,29 +204,55 @@ profile:()=>head(false)+`<button class="link" data-go="home">← Back home</butt
  <button class="cta" data-act="install" style="background:none">Install app on this phone</button>
  <div class="center sub">07.11.2026</div></div>`,
 
-welcome:()=>`<div class="stack center" style="padding-top:40px"><div class="logo" style="font-size:36px">Vitala</div><div class="sub">Eat healthy. Save time.</div>${HERO}
+welcome:()=>`<div class="stack center" style="padding-top:40px"><div class="logo" style="font-size:36px">Vitala</div><div class="sub">Eat healthy. Save time.</div>${hero()}
  <label class="field"><span>Name</span><input id="login" placeholder="Your name" value="${esc(S.name)}"></label><button class="cta" data-act="login">Start</button></div>`
 };
-function chips(){const list=INGREDIENTS.filter(x=>x.toLowerCase().includes(query.trim().toLowerCase()));
- return list.length?list.map(x=>`<button data-ing="${x}" class="${S.have.includes(x)?'on':''}" aria-pressed="${S.have.includes(x)}">${x}</button>`).join(''):'<small style="grid-column:1/-1">Nothing found. Try another word.</small>'}
+const groups=()=>Object.entries({...CATS,...(S.custom.length?{'Added by you':S.custom}:{})});
+const grid=(list,attr,sel)=>`<div class="chips">${list.map(x=>`<button data-${attr}="${esc(x)}" class="${sel.includes(x)?'on':''}" aria-pressed="${sel.includes(x)}">${esc(x)}</button>`).join('')}</div>`;
+function chips(){const q=query.trim().toLowerCase();
+ const html=groups().map(([name,list])=>{const l=list.filter(x=>x.toLowerCase().includes(q));return l.length?`<h2 class="cat">${name}</h2>${grid(l,'ing',S.have)}`:''}).join('');
+ const exact=groups().some(([,l])=>l.some(x=>x.toLowerCase()===q));
+ return html+(q&&!exact?`<button class="cta" data-act="custom" style="margin-top:12px">+ Add “${esc(query.trim())}”</button>`:'')}
 
 function render(top){
  newDay();
  const [v,k]=(location.hash.slice(1)||'home').split('-');
  view=S.out?'welcome':(V[v]&&v!=='welcome'&&(v!=='details'||Object.hasOwn(R,k)))?v:'home';
  if(view!=='scan'){stopCam();photo=''}
- const el=$('#app'),y=el.scrollTop;
+ const el=$('#app'),y=el.scrollTop,cy=$('#chips')?.scrollTop;
  el.innerHTML=V[view](k);
  el.scrollTop=top?0:y;
+ if(!top&&cy&&$('#chips'))$('#chips').scrollTop=cy;
  if(stream&&$('#video'))$('#video').srcObject=stream;
 }
 function go(v){if(location.hash==='#'+v)render(true);else location.hash=v}
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,3500)}
 function sheet(html){const s=$('#sheet');s.innerHTML=html?`<div class="stack">${html}</div>`:'';s.hidden=!html}
 function stopCam(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
-function pickFound(){sheet(`<h2>What is in your photo?</h2><small>This version does not recognize food automatically. Tap the products you see.</small>
- <div class="chips" style="margin:0">${INGREDIENTS.map(x=>`<button data-found="${x}" class="${found.includes(x)?'on':''}">${x}</button>`).join('')}</div>
- <button class="cta" data-act="addfound">Add to my ingredients</button><button class="link" data-act="close">Cancel</button>`)}
+function pickFound(){const keep=$('#sheet').firstElementChild?.scrollTop||0;
+ sheet(`<h2>What is in your photo?</h2><small role="status">${esc(note)}</small>
+ <button class="cta" data-act="addfound">Add ${found.length||''} to my ingredients</button>
+ <div>${groups().map(([n,l])=>`<h2 class="cat">${n}</h2>${grid(l,'found',found)}`).join('')}</div>
+ <button class="link" data-act="close">Cancel</button>`);$('#sheet').firstElementChild.scrollTop=keep}
+// on-device recognition (MobileNet). It only knows some foods, so the user always confirms.
+const KNOWN={'granny smith':'Apples','banana':'Bananas','orange':'Oranges','lemon':'Lemons','strawberry':'Strawberries','pineapple':'Pineapple','broccoli':'Broccoli','cauliflower':'Cauliflower','cucumber':'Cucumber','zucchini':'Zucchini','bell pepper':'Bell pepper','mushroom':'Mushrooms','head cabbage':'Cabbage','french loaf':'Bread','bagel':'Bread','corn':'Corn'};
+let model=null;
+const script=src=>new Promise((ok,no)=>{const e=document.createElement('script');e.src=src;e.onload=ok;e.onerror=()=>{e.remove();no()};document.head.append(e)});
+async function loadModel(){
+ if(!window.tf)await script('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js');
+ if(!window.mobilenet)await script('https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js');
+ return window.mobilenet.load({version:2,alpha:1})}
+async function recognize(){
+ const id=++scanId;found=[];note='Looking for products… The first time can take a while.';pickFound();
+ let result='';
+ try{const img=new Image();img.src=photo;await img.decode();
+  const guesses=await Promise.race([(async()=>{model=model||await loadModel();return model.classify(img,5)})(),new Promise((_,no)=>setTimeout(no,30000))]);
+  const names=[...new Set(guesses.filter(g=>g.probability>.15).flatMap(g=>g.className.toLowerCase().split(', ').map(w=>KNOWN[w]).filter(Boolean)))];
+  if(id!==scanId)return;
+  found=[...new Set([...found,...names])];
+  result=names.length?`Looks like: ${names.join(', ')}. Check it before adding.`:'Could not recognize it. Tap the products you see.';
+ }catch(e){result='Recognition is not available right now. Tap the products you see.'}
+ if(id!==scanId||$('#sheet').hidden)return;note=result;pickFound()}
 function schedule(){clearInterval(timer);if(S.remind)timer=setInterval(()=>{toast('Time to drink some water');
  try{if(Notification.permission==='granted')navigator.serviceWorker.ready.then(r=>r.showNotification('Vitala',{body:'Time to drink some water'}))}catch(e){}},3600000)}
 
@@ -203,12 +260,14 @@ const ACT={
  async scan(){photo='';
   try{const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
    if(view!=='scan'){s.getTracks().forEach(t=>t.stop());return}stream=s;render()}
-  catch(e){render();$('#file').click()}},
+  catch(e){render();toast('Camera is not available here. Use “Take or choose a photo”.')}},
  shoot(){const v=$('#video');if(!v||!v.videoWidth)return toast('Camera is still starting');
   const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);
-  photo=c.toDataURL('image/jpeg',.8);stopCam();render();found=[];pickFound()},
- addfound(){const n=found.length;S.have=[...new Set([...S.have,...found])];save();sheet();toast(n?'Ingredients added':'Nothing selected')},
- close(){sheet()},
+  photo=c.toDataURL('image/jpeg',.8);stopCam();render();recognize()},
+ addfound(){scanId++;const n=found.length;S.have=[...new Set([...S.have,...found])];save();sheet();toast(n?'Ingredients added':'Nothing selected')},
+ close(){scanId++;sheet()},
+ custom(){const x=query.trim().slice(0,30);if(!x)return;S.custom.push(x);S.have.push(x);query='';save();render()},
+ copy(){const u=location.origin+location.pathname;navigator.clipboard?.writeText(u).then(()=>toast('Link copied'),()=>toast(u))},
  reset(){S.water=0;save();render()},
  remind(){S.remind=!S.remind;save();schedule();render();
   if(S.remind){try{Notification.requestPermission()}catch(e){}toast('Reminders on while the app is open')}},
@@ -217,8 +276,9 @@ const ACT={
  premium(){toast('Premium is a concept in this student project. Nothing is charged.')},
  async install(){
   if(installEvt){installEvt.prompt();installEvt=null;return}
-  sheet(`<h2>Install Vitala</h2><p><b>iPhone:</b> open the site in Safari, tap Share, then “Add to Home Screen”.</p><p><b>Android:</b> open the site in Chrome, tap ⋮, then “Install app” or “Add to Home screen”.</p><button class="cta" data-act="close">Got it</button>`)}
+  sheet(`<h2>Install Vitala</h2><p><b>iPhone:</b> open the link in Safari, tap Share, then “Add to Home Screen”.</p><p><b>Android:</b> open the link in Chrome, tap ⋮, then “Install app” or “Add to Home screen”.</p><button class="cta" data-act="copy">Copy app link</button><button class="link" data-act="close">Close</button>`)}
 };
+const installed=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
 document.addEventListener('click',e=>{
  if(e.target.id==='sheet')return sheet();
  const b=e.target.closest('button');if(!b)return;const d=b.dataset;
@@ -238,7 +298,7 @@ document.addEventListener('input',e=>{
  if(f){S[f]=e.target.value;save();if(f==='name')$('.title-card h2').textContent=e.target.value}
 });
 document.addEventListener('change',e=>{
- if(e.target.id==='file'&&e.target.files[0]){const r=new FileReader();r.onload=()=>{photo=r.result;render();found=[];pickFound()};r.readAsDataURL(e.target.files[0])}
+ if(e.target.id==='file'&&e.target.files[0]){const r=new FileReader();r.onload=()=>{stopCam();photo=r.result;render();recognize()};r.readAsDataURL(e.target.files[0])}
 });
 addEventListener('hashchange',()=>{sheet();render(true)});
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e});
