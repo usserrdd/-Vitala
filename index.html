@@ -56,6 +56,12 @@ h2{font-size:16px;font-weight:500}
 .chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:13px}
 .chips button{padding:9px 2px;font-size:13px;border-radius:12px;min-width:0;overflow-wrap:anywhere}
 .cat{margin-top:14px;font-size:14px}
+.ava{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+.big-ava{width:96px;height:96px;margin:0 auto 6px;border:1.5px solid var(--line)}
+.ava-actions{display:flex;justify-content:center;align-items:center;gap:10px;margin-top:8px}
+.pill{border:1.5px solid var(--line);border-radius:99px;background:var(--paper);padding:3px 14px;font-size:13px;cursor:pointer}
+.pill:focus-within{outline:3px solid var(--water)}
+.sr{position:absolute;width:1px;height:1px;opacity:0}
 li.ing{gap:12px}.hint{display:block;color:var(--soft);padding-left:18px}.mark{text-align:right;font-size:13px}
 .thumb{width:66px;height:66px;object-fit:cover;border-radius:11px;border:1.5px solid var(--line);flex:none}
 .card .top .info{flex:1;min-width:0}
@@ -154,7 +160,7 @@ const note4=m=>[...m.swap.map(([a,b])=>`${a} → ${b}`),m.skip.length?`without $
 const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],FULL=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 const MEALS=[['Breakfast','Choose a recipe'],['Lunch','Choose a recipe'],['Dinner','Plan something delicious']];
 const today=()=>new Date().toLocaleDateString('en-CA');
-const FRESH={sex:'female',height:'',weight:'',activity:'walk',minutes:'',log:[],custom:[],have:['Eggs','Tomatoes','Bread','Pasta','Chicken','Rice','Cheese','Spinach'],water:750,date:today(),plan:{'0-0':'toast'},cooked:{},remind:false,name:'Asiya',age:'',mail:'',out:false};
+const FRESH={avatar:'',sex:'female',height:'',weight:'',activity:'walk',minutes:'',log:[],custom:[],have:['Eggs','Tomatoes','Bread','Pasta','Chicken','Rice','Cheese','Spinach'],water:750,date:today(),plan:{'0-0':'toast'},cooked:{},remind:false,name:'Asiya',age:'',mail:'',out:false};
 let S=structuredClone(FRESH);
 try{Object.assign(S,JSON.parse(localStorage.getItem('vitala')||'{}'))}catch(e){}
 const save=()=>{try{localStorage.setItem('vitala',JSON.stringify(S))}catch(e){}};
@@ -180,8 +186,9 @@ document.addEventListener('error',e=>{const k=e.target.dataset?.food;if(k){noImg
 let noPhoto=false;
 const hero=()=>noPhoto?HERO:'<img class="hero" src="hero.jpg" alt="Fresh food">';
 document.addEventListener('error',e=>{if(e.target.matches?.('img.hero')){noPhoto=true;e.target.outerHTML=HERO}},true);
+const avatar=cls=>`<img class="${cls}" src="${esc(S.avatar)}" alt="">`;
 const TABS=[['home','Home'],['ingredients','Ingredients'],['recipes','Recipes'],['planner','Planner'],['water','Water']];
-const head=(tabs=true,cur=view)=>`<header><div class="logo">Vitala</div><button class="round" data-go="profile" aria-label="My profile">${ic('user')}</button></header>`+
+const head=(tabs=true,cur=view)=>`<header><div class="logo">Vitala</div><button class="round" data-go="profile" aria-label="My profile">${S.avatar?avatar('ava'):ic('user')}</button></header>`+
  (tabs?`<nav>${TABS.map(([v,l])=>`<button data-go="${v}" class="${v===cur?'on':''}">${l}</button>`).join('')}</nav>`:'');
 
 // resting energy: Mifflin-St Jeor equation; activity: MET values (approximate), minus 1 MET already counted as rest
@@ -254,7 +261,8 @@ water:()=>head()+`<h1>Water Tracker</h1><div class="sub">Keep track of your drin
  <button class="switch" role="switch" aria-checked="${S.remind}" aria-label="Water reminders" data-act="remind"><i></i></button></div></div>`,
 
 profile:()=>head(false)+`<button class="link" data-go="home">← Back home</button><div class="row" style="margin-bottom:10px"><h1>My profile</h1><button class="link" data-act="logout">Log out</button></div><div class="stack">
- <div class="box title-card">${ic('user')}<h2>${esc(S.name)}</h2></div>
+ <div class="box title-card">${S.avatar?avatar('ava big-ava'):ic('user')}<h2>${esc(S.name)}</h2>
+ <div class="ava-actions"><label class="pill">${S.avatar?'Change photo':'Add photo'}<input type="file" id="ava-file" accept="image/*" class="sr"></label>${S.avatar?'<button class="link" data-act="noava">Remove</button>':''}</div></div>
  <div><h2>Personal information</h2>
  ${[['name','Name','text','Your name'],['age','Age','number','Add age'],['mail','Gmail','email','name@gmail.com']].map(([k,l,t,h])=>`<label class="field"><span>${l}</span><input id="f-${k}" data-field="${k}" type="${t}" placeholder="${h}" value="${esc(S[k])}"></label>`).join('')}</div>
  ${burnCard()}
@@ -291,6 +299,14 @@ function pickList(slot,q){q=q.trim().toLowerCase();
  const can=matches(),hit=k=>R[k].n.toLowerCase().includes(q)||R[k].i.some(x=>x.toLowerCase().includes(q));
  const block=(title,keys)=>keys.length?`<h2>${title}</h2>`+keys.map(k=>`<button class="card" data-pick="${k}" data-slot="${slot}"><div class="top">${food(k,'thumb')}<div class="info"><b>${R[k].n}</b><small>${R[k].t} min · ${R[k].k} kcal</small></div></div></button>`).join(''):'';
  return block('You can cook now',can.filter(hit))+block('Other recipes',Object.keys(R).filter(k=>!can.includes(k)&&hit(k)))||'<small>No recipes found. Try another word.</small>'}
+async function setAvatar(file){
+ const url=URL.createObjectURL(file);
+ try{const img=new Image();img.src=url;await img.decode();
+  const side=Math.min(img.naturalWidth,img.naturalHeight),c=document.createElement('canvas');c.width=c.height=256;
+  c.getContext('2d').drawImage(img,(img.naturalWidth-side)/2,(img.naturalHeight-side)/2,side,side,0,0,256,256);
+  S.avatar=c.toDataURL('image/jpeg',.85);save();render();toast('Photo updated')
+ }catch(e){toast('Could not open this photo. Try another one.')}
+ finally{URL.revokeObjectURL(url)}}
 function pickFound(){const keep=$('#sheet').firstElementChild?.scrollTop||0;
  sheet(`<h2>What is in your photo?</h2><small role="status">${esc(note)}</small>
  <button class="cta" data-act="addfound">Add ${found.length||''} to my ingredients</button>
@@ -328,6 +344,7 @@ const ACT={
   photo=c.toDataURL('image/jpeg',.8);stopCam();render();recognize()},
  addfound(){scanId++;const n=found.length;S.have=[...new Set([...S.have,...found])];save();sheet();toast(n?'Ingredients added':'Nothing selected')},
  close(){scanId++;sheet()},
+ noava(){S.avatar='';save();render()},
  addburn(){if(!(inRange(S.age,18,100)&&inRange(S.weight,35,250)&&inRange(S.height,120,230)))return toast('Fill in age (18+), height and weight first');
   const min=Number(S.minutes);if(!inRange(min,1,600))return toast('Enter minutes from 1 to 600');
   S.log.push({id:Date.now(),date:today(),a:S.activity,min,kcal:Math.round(burned(MET[S.activity][1],+S.weight,min))});S.minutes='';save();render();toast('Activity added')},
@@ -369,6 +386,7 @@ document.addEventListener('input',e=>{
  if(f){S[f]=e.target.value;save();if($('#burn'))$('#burn').innerHTML=burnHTML();if(f==='name')$('.title-card h2').textContent=e.target.value}
 });
 document.addEventListener('change',e=>{
+ if(e.target.id==='ava-file'&&e.target.files[0])setAvatar(e.target.files[0]);
  if(e.target.id==='file'&&e.target.files[0]){const r=new FileReader();r.onload=()=>{stopCam();photo=r.result;render();recognize()};r.readAsDataURL(e.target.files[0])}
 });
 addEventListener('hashchange',()=>{sheet();render(true)});
